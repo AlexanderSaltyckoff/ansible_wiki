@@ -1,0 +1,40 @@
+---
+- name: db_install
+  hosts: all
+  become: yes
+  vars:
+    db_user: "wikijs"
+    db_password: "12345"
+    db_name: "wiki"
+  tasks:
+    - name: Update apt repo and cache on Ubuntu box
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name:
+          - wget
+          - python3-psycopg2
+          - acl
+        state: latest
+
+    - name: Install postgresql
+      apt:
+        name: postgresql-14
+        update_cache: yes
+      notify:
+        - Enable Postgresql
+
+    - name: Create a Superuser PostgreSQL database user
+      become: yes
+      become_user: postgres
+      postgresql_user:
+        name: "wiki"
+        password: "12345"
+        role_attr_flags: CREATEDB,SUPERUSER,CREATEROLE
+        encrypted: yes
+        state: present
+
