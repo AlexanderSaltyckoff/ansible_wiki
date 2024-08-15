@@ -2,10 +2,7 @@
 - name: db_install
   hosts: all
   become: yes
-  vars:
-    db_user: "wikijs"
-    db_password: "12345"
-    db_name: "wiki"
+
   tasks:
     - name: Update apt repo and cache on Ubuntu box
       apt:

@@ -26,15 +26,17 @@
       ansible.builtin.lineinfile:
         dest: /var/wiki/config.yml
         regexp: '^  pass: wikijsrocks'
-        line: "  pass: 12345"
-
-    - name: start wikijs_server
-      ansible.builtin.shell:
-        cmd: node server
-        chdir: /var/wiki
+        line: '  pass: 12345'
 
     - name: Change pass_to_connetcion_data_base
       ansible.builtin.lineinfile:
         dest: /var/wiki/config.yml
         regexp: '^  user: wikijs'
         line: "  user: wiki"
+
+#    - name: start wikijs_server
+#      ansible.builtin.shell:
+#        cmd: node server
+#        chdir: /var/wiki
+#
+##static start
