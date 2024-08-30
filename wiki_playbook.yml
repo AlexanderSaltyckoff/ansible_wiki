@@ -1,7 +1,7 @@
 ---
 
 - name: deploy wiki
-  hosts: test
+  hosts: stagingservers
   become: yes
 
   roles:
