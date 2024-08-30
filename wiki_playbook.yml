@@ -1,0 +1,8 @@
+---
+
+- name: deploy wiki
+  hosts: test
+  become: yes
+
+  roles:
+    - deploy_wiki

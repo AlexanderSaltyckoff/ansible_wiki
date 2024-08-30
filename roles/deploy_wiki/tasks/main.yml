@@ -1,2 +1,79 @@
 ---
 # tasks file for deploy_wiki
+- name: Update apt repo and cache on Ubuntu box
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+    cache_valid_time: 3600
+
+- name: Install required packages
+  apt:
+    name:
+      - wget
+      - python3-psycopg2
+      - acl
+      - nodejs
+    state: latest
+
+- name: Install postgresql
+  apt:
+    name: postgresql-14
+    update_cache: yes
+  notify:
+    - Enable Postgresql
+
+- name: Create a Superuser PostgreSQL database user
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    name: "wiki"
+    password: "12345"
+    role_attr_flags: CREATEDB,SUPERUSER,CREATEROLE
+    encrypted: yes
+    state: present
+
+- name: download file
+  ansible.builtin.get_url:
+    url: "https://github.com/Requarks/wiki/releases/latest/download/wiki-js.tar.gz"
+    dest: "/home"
+    mode: '0666'
+
+- name: Create_work_dir
+  ansible.builtin.file:
+    path: /var/wiki
+    state: directory
+
+- name: Extract wiki-js.tar.gz into /var/wiki
+  ansible.builtin.unarchive:
+    src: /home/wiki-js.tar.gz
+    dest: /var/wiki
+    remote_src: yes
+
+- name: Change_the_working_directory
+  ansible.builtin.shell:
+    cmd: mv config.sample.yml config.yml
+    chdir: /var/wiki
+
+- name: Change pass_to_connetcion_data_base
+  ansible.builtin.lineinfile:
+    dest: /var/wiki/config.yml
+    regexp: '^  pass: wikijsrocks'
+    line: '  pass: 12345'
+
+- name: Change pass_to_connetcion_data_base
+  ansible.builtin.lineinfile:
+    dest: /var/wiki/config.yml
+    regexp: '^  user: wikijs'
+    line: "  user: wiki"
+
+#- name: start wikijs_server
+#  ansible.builtin.shell:
+#    cmd: node server
+#    chdir: /var/wiki
+#
+##static start
+
+- name: add systemd service
+  ansible.builtin.template:
+    src: files/wiki.service
+    dest: /etc/systemd/system/wiki.service
